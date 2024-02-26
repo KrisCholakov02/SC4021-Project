@@ -12,7 +12,7 @@ export default function PagesLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <NavbarWithMegaMenu />
-      <div className="flex flex-grow bg-red-400">{children}</div>
+      <div className="flex flex-grow bg-gray-300 py-16 px-8">{children}</div>
       <SimpleFooter />
     </div>
   );
