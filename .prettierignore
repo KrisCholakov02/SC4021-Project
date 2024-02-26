@@ -1,0 +1,5 @@
+.prettierignore
+public/
+.gitignore
+.next
+node_modules
