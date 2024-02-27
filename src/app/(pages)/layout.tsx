@@ -10,10 +10,16 @@ export default function PagesLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <NavbarWithMegaMenu />
-      <div className="flex flex-grow bg-gray-300 py-16 px-8">{children}</div>
-      <SimpleFooter />
+    <div className="w-full flex flex-col min-h-screen">
+      <div className="w-full">
+        <NavbarWithMegaMenu />
+      </div>
+      <div className="w-full flex flex-grow bg-gray-300 py-16 px-8">
+        {children}
+      </div>
+      <div className="w-full">
+        <SimpleFooter />
+      </div>
     </div>
   );
 }

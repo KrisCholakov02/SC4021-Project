@@ -24,7 +24,7 @@ export default function RootLayout({
       <body
         className={classNames(
           inter.className,
-          'h-screen w-screen bg-gray-100 bg-none'
+          'h-full w-full bg-gray-100 bg-none overflow-y-auto'
         )}
       >
         {children}
