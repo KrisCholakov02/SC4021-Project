@@ -4,7 +4,7 @@ import MT from '@/utils/MT';
 
 export function QueryResultCard(result: any) {
   return (
-    <MT.Card placeholder={undefined} className="!w-full">
+    <MT.Card placeholder={undefined} className="!w-full bg-gray-300">
       <MT.CardBody placeholder={undefined}>
         <MT.Typography
           variant="h5"

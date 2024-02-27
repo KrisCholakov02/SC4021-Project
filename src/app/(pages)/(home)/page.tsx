@@ -4,6 +4,7 @@ import React from 'react';
 
 import { QueryResultCard } from '@/components/query-result-card';
 import { SearchBar } from '@/components/search-bar';
+import MT from '@/utils/MT';
 
 export default function Home() {
   const sampleResults = [
@@ -103,23 +104,32 @@ export default function Home() {
   return (
     <div className="w-full flex flex-grow">
       {/* Container for the possible left side content to be displayed */}
-      <div className="bg-red-400 w-0 lg:w-1/4 2xl:w-1/5"></div>
+      <div className="w-0 lg:w-1/4 2xl:w-1/5"></div>
       {/* Container for central functionality - Search, Results, Sort, etc. */}
-      <div className="flex-col flex flex-grow basis-0 items-center px-8 xl:px-12 2xl:px-18 bg-amber-400">
+      <div className="flex-col flex flex-grow basis-0 items-center px-8 xl:px-12 2xl:px-18">
         <div className="mb-8 bg-black w-52 h-28">Logo</div>
         <div className="mb-8 w-full">
           <SearchBar />
         </div>
-        <div className="w-full flex flex-col items-center justify-items-center space-y-8">
+        <div className="w-full flex flex-col items-center justify-items-center space-y-8 bg-white rounded-lg p-4">
+          <div className="flex w-full items-center">
+            <div className="w-fit ml-4">
+              <MT.Select label="Sort By" placeholder={undefined}>
+                <MT.Option value="s1">Sort 1</MT.Option>
+                <MT.Option value="s2">Sort 2</MT.Option>
+                <MT.Option value="s3">Sort 3</MT.Option>
+              </MT.Select>
+            </div>
+          </div>
           {sampleResults.map((result, index) => (
-            <div key={index}>
+            <div key={index} className="w-full">
               <QueryResultCard {...result} />
             </div>
           ))}
         </div>
       </div>
       {/* Container for the possible right side content - Charts, Graph, Stats, etc. */}
-      <div className="bg-red-400 w-0 lg:w-1/4 2xl:w-1/5"></div>
+      <div className="w-0 lg:w-1/4 2xl:w-1/5"></div>
     </div>
   );
 }
