@@ -14,7 +14,7 @@ export default function PagesLayout({
       <div className="w-full">
         <NavbarWithMegaMenu />
       </div>
-      <div className="w-full flex flex-grow bg-gray-300 py-16 px-8">
+      <div className="w-full flex flex-grow bg-gray-300 py-8 px-8">
         {children}
       </div>
       <div className="w-full">

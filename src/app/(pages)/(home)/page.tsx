@@ -101,18 +101,25 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex-col flex-grow flex items-center">
-      <div className="mb-8 bg-black w-56 h-32">Logo</div>
-      <div className="mb-4 w-full">
-        <SearchBar />
+    <div className="w-full flex flex-grow">
+      {/* Container for the possible left side content to be displayed */}
+      <div className="bg-red-400 w-0 lg:w-1/4 2xl:w-1/5"></div>
+      {/* Container for central functionality - Search, Results, Sort, etc. */}
+      <div className="flex-col flex flex-grow basis-0 items-center px-8 xl:px-12 2xl:px-18 bg-amber-400">
+        <div className="mb-8 bg-black w-52 h-28">Logo</div>
+        <div className="mb-8 w-full">
+          <SearchBar />
+        </div>
+        <div className="w-full flex flex-col items-center justify-items-center space-y-8">
+          {sampleResults.map((result, index) => (
+            <div key={index}>
+              <QueryResultCard {...result} />
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="w-full flex flex-col items-center justify-items-center">
-        {sampleResults.map((result, index) => (
-          <div key={index} className="w-9/12">
-            <QueryResultCard {...result} />
-          </div>
-        ))}
-      </div>
+      {/* Container for the possible right side content - Charts, Graph, Stats, etc. */}
+      <div className="bg-red-400 w-0 lg:w-1/4 2xl:w-1/5"></div>
     </div>
   );
 }
