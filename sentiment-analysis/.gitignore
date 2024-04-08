@@ -1,1 +1,4 @@
-saved_model/
+bertmodel_imdb_trained/
+bertmodel_tweets_trained/
+timeless_model_tweets_trained/
+ground truth.csv
