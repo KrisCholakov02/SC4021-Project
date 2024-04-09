@@ -1,1 +1,10 @@
-saved_model/
+# BERT model files
+config.json
+model.safetensors
+optimizer.pt
+rng_state.pth
+scheduler.pt
+trainer_state.json
+training_args.bin
+
+ground truth.csv
