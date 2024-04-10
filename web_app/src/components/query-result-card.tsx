@@ -1,5 +1,7 @@
 import React from 'react';
 
+import Link from 'next/link';
+
 import MT from '@/utils/MT';
 
 export function QueryResultCard(result: any) {
@@ -19,7 +21,9 @@ export function QueryResultCard(result: any) {
         </MT.Typography>
       </MT.CardBody>
       <MT.CardFooter className="pt-0" placeholder={undefined}>
-        <MT.Button placeholder={undefined}>Read More</MT.Button>
+        <Link href={`/r/${result.id}`}>
+          <MT.Button placeholder={undefined}>Read More</MT.Button>
+        </Link>
       </MT.CardFooter>
     </MT.Card>
   );

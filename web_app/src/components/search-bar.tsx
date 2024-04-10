@@ -4,9 +4,18 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 import MT from '@/utils/MT';
 
-export function SearchBar() {
+export function SearchBar({
+  setSearched
+}: {
+  // eslint-disable-next-line no-unused-vars
+  setSearched: (v: boolean) => void;
+}) {
   const [isAdvancedSearchEnabled, setIsAdvancedSearchEnabled] =
     React.useState(false);
+
+  const handleClick = () => {
+    setSearched(true);
+  };
 
   return (
     <div className="inline-flex items-center justify-center w-full">
@@ -17,10 +26,14 @@ export function SearchBar() {
           color="black"
           crossOrigin={undefined}
           label="Search for anything you want..."
-          icon={React.createElement(MagnifyingGlassIcon, {
-            strokeWidth: 2,
-            className: 'text-gray-900'
-          })}
+          icon={
+            <button className="h-full w-full" onClick={() => handleClick()}>
+              {React.createElement(MagnifyingGlassIcon, {
+                strokeWidth: 2,
+                className: 'text-gray-600 hover:text-gray-900 transition-colors'
+              })}
+            </button>
+          }
         />
         {/* Container for the advanced search options */}
         <div

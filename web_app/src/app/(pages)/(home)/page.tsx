@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { QueryResultCard } from '@/components/query-result-card';
 import { SearchBar } from '@/components/search-bar';
@@ -101,32 +101,51 @@ export default function Home() {
     }
   ];
 
+  // Define the variable to store if the user has searched for something
+  const [searched, setSearched] = useState(false);
+
   return (
     <div className="w-full flex flex-grow">
       {/* Container for the possible left side content to be displayed */}
       <div className="w-0 lg:w-1/4 2xl:w-1/5"></div>
       {/* Container for central functionality - Search, Results, Sort, etc. */}
-      <div className="flex-col flex flex-grow basis-0 items-center px-8 xl:px-12 2xl:px-18">
-        <div className="mb-8 bg-black w-52 h-28">Logo</div>
-        <div className="mb-8 w-full">
-          <SearchBar />
-        </div>
-        <div className="w-full flex flex-col items-center justify-items-center space-y-8 bg-white rounded-lg p-4">
-          <div className="flex w-full items-center">
-            <div className="w-fit ml-4">
-              <MT.Select label="Sort By" placeholder={undefined}>
-                <MT.Option value="s1">Sort 1</MT.Option>
-                <MT.Option value="s2">Sort 2</MT.Option>
-                <MT.Option value="s3">Sort 3</MT.Option>
-              </MT.Select>
-            </div>
+      <div className="flex-col flex flex-grow basis-0 items-center justify-center px-8 xl:px-12 2xl:px-18">
+        <div className="w-full flex flex-col items-center justify-items-center">
+          <div
+            onClick={() => {
+              // Refresh the page
+              window.location.reload();
+            }}
+            className="mb-8 w-72 h-40"
+            style={{
+              backgroundImage: `url(logo-nobg.png)`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          />
+          <div className="mb-8 w-full">
+            <SearchBar setSearched={setSearched} />
           </div>
-          {sampleResults.map((result, index) => (
-            <div key={index} className="w-full">
-              <QueryResultCard {...result} />
-            </div>
-          ))}
         </div>
+        {searched ? (
+          <div className="w-full flex flex-col items-center justify-items-center space-y-8 bg-white rounded-lg p-4">
+            <div className="flex w-full items-center">
+              <div className="w-fit ml-4">
+                <MT.Select label="Sort By" placeholder={undefined}>
+                  <MT.Option value="s1">Sort 1</MT.Option>
+                  <MT.Option value="s2">Sort 2</MT.Option>
+                  <MT.Option value="s3">Sort 3</MT.Option>
+                </MT.Select>
+              </div>
+            </div>
+            {sampleResults.map((result, index) => (
+              <div key={index} className="w-full">
+                <QueryResultCard {...result} />
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
       {/* Container for the possible right side content - Charts, Graph, Stats, etc. */}
       <div className="w-0 lg:w-1/4 2xl:w-1/5"></div>

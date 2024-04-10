@@ -1,20 +1,18 @@
 import React from 'react';
 
+import Link from 'next/link';
+
 import { Typography } from '@material-tailwind/react';
 
 export function SimpleFooter() {
   const links = [
     {
-      title: 'About Us',
-      url: '#'
-    },
-    {
-      title: 'Topics',
-      url: '#'
+      title: 'About The Project',
+      url: '/about'
     },
     {
       title: 'Contribution',
-      url: '#'
+      url: '/contribution'
     }
   ];
 
@@ -30,15 +28,15 @@ export function SimpleFooter() {
       <ul className="flex flex-wrap items-center gap-y-2 gap-x-8">
         {links.map((link, index) => (
           <li key={index}>
-            <Typography
-              as="a"
-              href={link.url}
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-              placeholder={undefined}
-            >
-              {link.title}
-            </Typography>
+            <Link href={link.url}>
+              <Typography
+                color="blue-gray"
+                className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
+                placeholder={undefined}
+              >
+                {link.title}
+              </Typography>
+            </Link>
           </li>
         ))}
       </ul>
