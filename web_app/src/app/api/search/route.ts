@@ -2,12 +2,20 @@ export async function POST(req: Request) {
   let body: any = await req.json();
   let query = body.query;
   let field = body.field;
+  let numRows = body.numRows;
+  let page = body.page;
+  let sortField = body.sortField;
+  let sortDirection = body.sortDirection;
 
   let encodedQuery = encodeURIComponent(query);
 
   let finalQuery = `${field}:${encodedQuery}`;
+  let sortQuery = '';
+  if (sortField !== '') {
+    sortQuery = `&sort=${sortField} ${sortDirection}`;
+  }
 
-  let solrQueryURL = `http://localhost:8983/solr/new_core/select?q=${finalQuery}&spellcheck=true&wt=json`;
+  let solrQueryURL = `http://localhost:8983/solr/new_core/select?q=${finalQuery}&rows=${numRows}&start=${(page - 1) * numRows}${sortQuery}&spellcheck=true&wt=json`;
 
   try {
     const response = await fetch(solrQueryURL, {
