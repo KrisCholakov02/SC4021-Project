@@ -2,107 +2,72 @@
 
 import React, { useState } from 'react';
 
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+
 import { QueryResultCard } from '@/components/query-result-card';
-import { SearchBar } from '@/components/search-bar';
 import MT from '@/utils/MT';
 
 export default function Home() {
-  const sampleResults = [
-    {
-      title: 'WebAssembly: Revolutionizing Web Performance',
-      description:
-        'WebAssembly enables near-native performance for web applications, broadening the scope of programming languages available for web development and enhancing user experiences for resource-intensive applications.',
-      author: 'AppMaster',
-      date: '2024',
-      rating: 5,
-      type: 'Web Development Trend'
-    },
-    {
-      title: 'Server-Driven UI: Enhancing Frontend and Backend Integration',
-      description:
-        'Server-driven UI simplifies the complexity of frontend code by making UI layout and components decisions server-side, improving the development process and user experience.',
-      author: 'AppMaster',
-      date: '2024',
-      rating: 5,
-      type: 'Web Development Trend'
-    },
-    {
-      title: 'Progressive Web Apps: Merging Web with Mobile',
-      description:
-        'PWAs offer a native app-like experience using web technology, providing functionalities like offline support, push notifications, and home screen access, improving user engagement and retention.',
-      author: 'AppMaster',
-      date: '2024',
-      rating: 5,
-      type: 'Web Development Trend'
-    },
-    {
-      title: 'API-First Design: Prioritizing Scalable Development',
-      description:
-        'API-first design focuses on creating consistent, flexible, and scalable APIs, improving collaboration among development teams and ensuring a modular and adaptable application architecture.',
-      author: 'AppMaster',
-      date: '2024',
-      rating: 5,
-      type: 'Web Development Trend'
-    },
-    {
-      title: 'Blockchain-Based Applications: Fostering Decentralization',
-      description:
-        'Blockchain technology enables secure, transparent, and decentralized web applications, extending beyond cryptocurrencies to various industries requiring data integrity and security.',
-      author: 'AppMaster',
-      date: '2024',
-      rating: 5,
-      type: 'Web Development Trend'
-    },
-    {
-      title: 'Machine Learning in the Browser: Leveraging TensorFlow.js',
-      description:
-        'TensorFlow.js allows the execution of machine learning models in the browser, enabling real-time data analysis, enhanced user privacy, and cutting-edge features like image recognition and natural language processing.',
-      author: 'AppMaster',
-      date: '2024',
-      rating: 5,
-      type: 'Web Development Trend'
-    },
-    {
-      title: 'Headless CMSs: Revolutionizing Content Management',
-      description:
-        'Headless CMSs decouple content management from presentation, enabling seamless content delivery across various platforms and devices, and offering developers greater flexibility in UI design.',
-      author: 'AppMaster',
-      date: '2024',
-      rating: 5,
-      type: 'Web Development Trend'
-    },
-    {
-      title: 'IoT and Web-Powered Interactive Experiences',
-      description:
-        'The integration of IoT devices with web applications opens up new possibilities for interactive and immersive user experiences across smart homes, wearables, healthcare, and more.',
-      author: 'AppMaster',
-      date: '2024',
-      rating: 5,
-      type: 'Web Development Trend'
-    },
-    {
-      title: 'Voice Search Optimization: Enhancing User Interactions',
-      description:
-        'Optimizing web applications for voice search improves user experience by allowing natural language queries, making information access faster and more intuitive.',
-      author: 'TechCrunch',
-      date: '2024',
-      rating: 4,
-      type: 'Web Development Trend'
-    },
-    {
-      title:
-        'Augmented Reality in Web Development: Creating Immersive Experiences',
-      description:
-        'AR technology in web development enables the creation of immersive user experiences directly in the browser, offering innovative ways to engage users and present information.',
-      author: 'Mozilla Developer Network',
-      date: '2024',
-      rating: 4,
-      type: 'Web Development Trend'
+  // Define the results from the search
+  const [results, setResults] = useState<{}[]>([]);
+
+  async function sendSimpleSearchRequest() {
+    try {
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query: simpleSearchQuery ? simpleSearchQuery : '*',
+          field: 'body'
+        })
+      });
+      if (response.status !== 200) {
+        console.error('An error occurred:', response.statusText);
+        return;
+      }
+      const data = await response.json();
+      setResults(data.response.docs);
+      if (data.spellcheck?.suggestions.length > 0)
+        setSpellSuggestions(data.spellcheck.suggestions[1].suggestion);
+      else setSpellSuggestions([]);
+    } catch (error) {
+      console.error('Error:', error);
     }
-  ];
+  }
+
+  async function sendAdvancedSearchRequest() {
+    try {
+      const response = await fetch('/api/search');
+      const data = await response.json();
+      setResults(data);
+      console.log(data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
 
   // Define the variable to store if the user has searched for something
   const [searched, setSearched] = useState(false);
+
+  const [isAdvancedSearchEnabled, setIsAdvancedSearchEnabled] =
+    React.useState(false);
+
+  async function handleSearchClick() {
+    setSearched(true);
+    if (!isAdvancedSearchEnabled) {
+      await sendSimpleSearchRequest();
+    } else {
+      await sendAdvancedSearchRequest();
+    }
+  }
+
+  // Define the simple search query
+  const [simpleSearchQuery, setSimpleSearchQuery] = useState('');
+
+  // Define the spell suggestions
+  const [spellSuggestions, setSpellSuggestions] = useState<string[]>([]);
 
   return (
     <div className="w-full flex flex-grow">
@@ -125,7 +90,119 @@ export default function Home() {
             }}
           />
           <div className="mb-8 w-full">
-            <SearchBar setSearched={setSearched} />
+            {/* A select with all possible spell suggestions*/}
+            {spellSuggestions.length > 0 ? (
+              <div className="w-fit mb-2 bg-white p-2 rounded-lg">
+                <MT.Select
+                  label="Spell Suggestions"
+                  placeholder={undefined}
+                  onChange={(e: string | undefined) =>
+                    setSimpleSearchQuery(e as string)
+                  }
+                >
+                  {spellSuggestions.map((suggestion, index) => (
+                    <MT.Option key={index} value={suggestion}>
+                      {suggestion}
+                    </MT.Option>
+                  ))}
+                </MT.Select>
+              </div>
+            ) : null}
+            <div className="inline-flex items-center justify-center w-full">
+              {/* Container for the search input and the possible advance search options */}
+              <div className="flex flex-col flex-grow min-w-fit p-2 bg-white rounded-md">
+                <MT.Input
+                  size="lg"
+                  color="black"
+                  value={simpleSearchQuery}
+                  onChange={(e) => setSimpleSearchQuery(e.target.value)}
+                  crossOrigin={undefined}
+                  label="Search for anything you want..."
+                  icon={
+                    <button
+                      className="h-full w-full"
+                      onClick={async () => await handleSearchClick()}
+                    >
+                      {React.createElement(MagnifyingGlassIcon, {
+                        strokeWidth: 2,
+                        className:
+                          'text-gray-600 hover:text-gray-900 transition-colors'
+                      })}
+                    </button>
+                  }
+                />
+                {/* Container for the advanced search options */}
+                <div
+                  className={
+                    'flex flex-grow mt-4 border-t-gray-300 border-t-2 ' +
+                    (isAdvancedSearchEnabled ? 'visible' : 'hidden')
+                  }
+                >
+                  <div className="w-2/3 p-2 space-y-2">
+                    <MT.Typography color="black" placeholder={undefined}>
+                      Search Filters
+                    </MT.Typography>
+                    <div className="flex flex-grow">
+                      <div>
+                        <MT.Select label="Any Field" placeholder={undefined}>
+                          <MT.Option value="title">Title</MT.Option>
+                          <MT.Option value="author">Author</MT.Option>
+                          <MT.Option value="content">Content</MT.Option>
+                        </MT.Select>
+                      </div>
+                      <div>
+                        <MT.Select label="Contains" placeholder={undefined}>
+                          <MT.Option value="constains">Contains</MT.Option>
+                          <MT.Option value="exact">
+                            Contains exact phrase
+                          </MT.Option>
+                          <MT.Option value="starts">Starts with</MT.Option>
+                        </MT.Select>
+                      </div>
+                      <div>
+                        <MT.Input
+                          crossOrigin={undefined}
+                          label="Value"
+                          color="black"
+                        ></MT.Input>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-1/3 p-2 space-y-2">
+                    <MT.Typography color="black" placeholder={undefined}>
+                      Date
+                    </MT.Typography>
+                    <MT.Input
+                      label="From"
+                      color="black"
+                      crossOrigin={undefined}
+                      type="date"
+                    ></MT.Input>
+                    <MT.Input
+                      label="To"
+                      color="black"
+                      crossOrigin={undefined}
+                      type="date"
+                    ></MT.Input>
+                  </div>
+                </div>
+              </div>
+              {/* Container for the button that enables the advance search */}
+              <div className="max-w-fit">
+                <MT.Button
+                  onClick={() =>
+                    setIsAdvancedSearchEnabled(!isAdvancedSearchEnabled)
+                  }
+                  size="md"
+                  className="ml-4"
+                  placeholder={undefined}
+                >
+                  {isAdvancedSearchEnabled
+                    ? 'Simple Search'
+                    : 'Advanced Search'}
+                </MT.Button>
+              </div>
+            </div>
           </div>
         </div>
         {searched ? (
@@ -139,7 +216,7 @@ export default function Home() {
                 </MT.Select>
               </div>
             </div>
-            {sampleResults.map((result, index) => (
+            {results.map((result, index) => (
               <div key={index} className="w-full">
                 <QueryResultCard {...result} />
               </div>
