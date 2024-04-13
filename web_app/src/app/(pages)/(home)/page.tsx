@@ -46,12 +46,14 @@ export default function Home() {
   // Define the filtering options
   const [isFilteringOpened, setIsFilteringOpened] = useState(false);
   const [subredditFilter, setSubredditFilter] = useState<string[]>([]);
-  const [upvotesFromFilter, setUpvotesFromFilter] = useState(0);
-  const [upvotesToFilter, setUpvotesToFilter] = useState(0);
-  const [publishDateFromFilter, setPublishDateFromFilter] = useState('');
-  const [publishDateToFilter, setPublishDateToFilter] = useState('');
+  const [upvotesFromFilter, setUpvotesFromFilter] = useState<any>(undefined);
+  const [upvotesToFilter, setUpvotesToFilter] = useState<any>(undefined);
+  const [publishDateFromFilter, setPublishDateFromFilter] =
+    useState<any>(undefined);
+  const [publishDateToFilter, setPublishDateToFilter] =
+    useState<any>(undefined);
   const [authorFilter, setAuthorFilter] = useState('');
-  const [sentimentFilter, setSentimentFilter] = useState<string>('');
+  const [sentimentFilter, setSentimentFilter] = useState('');
 
   // Define the page number
   const [pageNumber, setPageNumber] = useState(-1);
@@ -61,14 +63,18 @@ export default function Home() {
     sortDirection: string,
     sortField: string
   ) {
-    // console.log all the filters
-    console.log('Subreddit Filter:', subredditFilter);
-    console.log('Upvotes From Filter:', upvotesFromFilter);
-    console.log('Upvotes To Filter:', upvotesToFilter);
-    console.log('Publish Date From Filter:', publishDateFromFilter);
-    console.log('Publish Date To Filter:', publishDateToFilter);
-    console.log('Author Filter:', authorFilter);
-    console.log('Sentiment Filter:', sentimentFilter);
+    // Define the filters object
+    let dates = [
+      publishDateFromFilter ? publishDateFromFilter : '',
+      publishDateToFilter ? publishDateToFilter : ''
+    ];
+    const filters = {
+      subreddit: subredditFilter,
+      upvotes: [upvotesFromFilter, upvotesToFilter],
+      publishDate: dates,
+      sentiment: sentimentFilter,
+      author: authorFilter
+    };
     try {
       const response = await fetch('/api/search', {
         method: 'POST',
@@ -79,7 +85,8 @@ export default function Home() {
           query: simpleSearchQuery !== '' ? simpleSearchQuery : '*',
           page: pageNumber,
           sortField: sortField,
-          sortDirection: sortDirection
+          sortDirection: sortDirection,
+          filters: filters
         })
       });
       if (response.status !== 200) {
@@ -252,7 +259,7 @@ export default function Home() {
                   >
                     Filter by Subreddit:
                   </MT.Typography>
-                  <div className="">
+                  <div>
                     {subreddits.map((subreddit) => (
                       <label className="flex items-center" key={subreddit}>
                         <MT.Checkbox
@@ -278,6 +285,7 @@ export default function Home() {
                 <MT.Typography
                   variant="lead"
                   placeholder={undefined}
+                  className="mb-2"
                   color="black"
                 >
                   Sentiment-Based Filtering:
@@ -308,7 +316,7 @@ export default function Home() {
                   <div className="flex items-center space-x-4">
                     <MT.Input
                       crossOrigin={undefined}
-                      value={upvotesFromFilter}
+                      value={upvotesFromFilter ? upvotesFromFilter : ''}
                       type="number"
                       label="From"
                       color="black"
@@ -318,7 +326,7 @@ export default function Home() {
                     />
                     <MT.Input
                       crossOrigin={undefined}
-                      value={upvotesToFilter}
+                      value={upvotesToFilter ? upvotesToFilter : ''}
                       type="number"
                       label="To"
                       color="black"
@@ -338,20 +346,72 @@ export default function Home() {
                     Publish Date Range:
                   </MT.Typography>
                   <div className="flex items-center space-x-4">
-                    <MT.Input
-                      crossOrigin={undefined}
-                      type="date"
-                      value={publishDateFromFilter}
-                      onChange={(e) => setPublishDateFromFilter(e.target.value)}
-                      label="From"
-                    />
-                    <MT.Input
-                      crossOrigin={undefined}
-                      type="date"
-                      value={publishDateToFilter}
-                      label="To"
-                      onChange={(e) => setPublishDateToFilter(e.target.value)}
-                    />
+                    <div className="flex flex-grow">
+                      <MT.Input
+                        crossOrigin={undefined}
+                        type={
+                          publishDateFromFilter !== undefined ? 'date' : 'text'
+                        }
+                        onClick={() => {
+                          const today = new Date();
+                          const formattedDate = today.toLocaleDateString(
+                            'en-CA',
+                            {
+                              // Canadian locale uses yyyy-mm-dd format
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            }
+                          );
+                          setPublishDateFromFilter(formattedDate);
+                        }}
+                        value={
+                          publishDateFromFilter ? publishDateFromFilter : ''
+                        }
+                        onChange={(e) =>
+                          setPublishDateFromFilter(e.target.value)
+                        }
+                        label="From"
+                      />
+                    </div>
+                    <MT.Button
+                      onClick={() => setPublishDateFromFilter(undefined)}
+                      placeholder={undefined}
+                      className="w-fit"
+                    >
+                      Reset
+                    </MT.Button>
+                    <div className="flex flex-grow">
+                      <MT.Input
+                        crossOrigin={undefined}
+                        type={
+                          publishDateToFilter !== undefined ? 'date' : 'text'
+                        }
+                        onClick={() => {
+                          const today = new Date();
+                          const formattedDate = today.toLocaleDateString(
+                            'en-CA',
+                            {
+                              // Canadian locale uses yyyy-mm-dd format
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            }
+                          );
+                          setPublishDateToFilter(formattedDate);
+                        }}
+                        value={publishDateToFilter ? publishDateToFilter : ''}
+                        label="To"
+                        onChange={(e) => setPublishDateToFilter(e.target.value)}
+                      />
+                    </div>
+                    <MT.Button
+                      onClick={() => setPublishDateToFilter(undefined)}
+                      placeholder={undefined}
+                      className="w-fit"
+                    >
+                      Reset
+                    </MT.Button>
                   </div>
                 </div>
                 {/* Field Search Filtering */}

@@ -1,5 +1,6 @@
 import React from 'react';
-import Plot from 'react-plotly.js';
+
+const Plot = require('react-plotly.js').default;
 
 export function SentimentPlot({
   data,
