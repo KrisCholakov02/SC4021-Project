@@ -4,8 +4,8 @@ export async function GET(
 ) {
   // Extract the id from the path
   let id = params.id;
-  let encodedQuery = encodeURIComponent(id);
-  let field = 'name';
+  let encodedQuery = encodeURIComponent(id.substring(3, id.length));
+  let field = 'id';
 
   let finalQuery = `${field}:${encodedQuery}`;
 

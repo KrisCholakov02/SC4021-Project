@@ -17,7 +17,7 @@ export function CommentCard(result: any) {
             className="w-fit items-center"
             placeholder={undefined}
           >
-            {result.author} • {result.created_utc}
+            {result.author} • {result.created_utc[0].substring(0, 10)}
           </MT.Typography>
           <div className="flex w-fit h-fit bg-white p-2 rounded-lg items-center">
             <MT.Typography variant="paragraph" placeholder={undefined}>
