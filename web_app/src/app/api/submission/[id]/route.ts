@@ -1,21 +1,15 @@
-export async function POST(req: Request) {
-  let body: any = await req.json();
-  let query = body.query;
-  let field = body.field;
-  let numRows = body.numRows;
-  let page = body.page;
-  let sortField = body.sortField;
-  let sortDirection = body.sortDirection;
-
-  let encodedQuery = encodeURIComponent(query);
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  // Extract the id from the path
+  let id = params.id;
+  let encodedQuery = encodeURIComponent(id);
+  let field = 'name';
 
   let finalQuery = `${field}:${encodedQuery}`;
-  let sortQuery = '';
-  if (sortField !== '') {
-    sortQuery = `&sort=${sortField} ${sortDirection}`;
-  }
 
-  let solrQueryURL = `http://localhost:8983/solr/new_core/select?q=${finalQuery}&q.op=or&rows=${numRows}&start=${(page - 1) * numRows}${sortQuery}&spellcheck=true&wt=json`;
+  let solrQueryURL = `http://localhost:8983/solr/submissions/select?q=${finalQuery}&rows=${1}&wt=json`;
 
   try {
     const response = await fetch(solrQueryURL, {

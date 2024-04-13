@@ -1,13 +1,10 @@
 import React from 'react';
 
-import Link from 'next/link';
-
 import { ArrowUpIcon } from '@heroicons/react/24/outline';
-import parse from 'html-react-parser';
 
 import MT from '@/utils/MT';
 
-export function QueryResultCard(result: any) {
+export function SubmissionCard(result: any) {
   return (
     <MT.Card placeholder={undefined} className="!w-full bg-gray-300">
       <MT.CardBody placeholder={undefined}>
@@ -30,7 +27,7 @@ export function QueryResultCard(result: any) {
           </div>
           <div className="flex w-fit h-fit bg-white p-2 rounded-lg items-center">
             <MT.Typography variant="paragraph" placeholder={undefined}>
-              Upvotes: <strong>{result.upvotes}</strong>
+              Upvotes: <strong>{result.score}</strong>
             </MT.Typography>
             <ArrowUpIcon className="ml-2 w-6 h-6" />
           </div>
@@ -43,13 +40,22 @@ export function QueryResultCard(result: any) {
         >
           {result.author} • {result.created_utc}
         </MT.Typography>
-        {/* The body of the comment */}
-        {parse(`${result.body_html}`)}
+        <MT.Typography
+          variant="lead"
+          color="blue-gray"
+          className="mb-2"
+          placeholder={undefined}
+        >
+          {result.title}
+        </MT.Typography>
+        {result.selftext ? result.selftext : ''}
       </MT.CardBody>
       <MT.CardFooter className="pt-0" placeholder={undefined}>
-        <Link href={`/r/${result.id}`}>
-          <MT.Button placeholder={undefined}>Read More</MT.Button>
-        </Link>
+        <a href={result.url} target="_blank" rel="noreferrer">
+          <MT.Button color="deep-orange" placeholder={undefined}>
+            Open in Reddit
+          </MT.Button>
+        </a>
       </MT.CardFooter>
     </MT.Card>
   );

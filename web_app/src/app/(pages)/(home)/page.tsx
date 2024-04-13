@@ -102,6 +102,7 @@ export default function Home() {
     setSearched(true);
     setPageNumber(1);
     if (!isFilteringApplied) {
+      console.log(simpleSearchQuery);
       await sendSimpleSearchRequest();
     } else {
       await sendSearchWithFiltersRequest();
