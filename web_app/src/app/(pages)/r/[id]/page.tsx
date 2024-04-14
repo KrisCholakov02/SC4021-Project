@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 
 import { CommentCard } from '@/components/comment-card';
 import { SubmissionCard } from '@/components/submission-card';
+import MT from '@/utils/MT';
 
 export default function RecordPage({ params }: { params: { id: string } }) {
   const [comment, setComment] = React.useState<any>(undefined);
@@ -55,8 +56,18 @@ export default function RecordPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="bg-white w-1/2 h-fit p-10 rounded-lg flex flex-col mx-auto">
+      <MT.Button
+        placeholder={undefined}
+        color="black"
+        className="mb-4 w-fit"
+        onClick={() => window.history.back()}
+      >
+        Back to Search
+      </MT.Button>
       <div className="flex w-full mb-4">
-        {submission ? <SubmissionCard {...submission} /> : null}
+        {submission ? (
+          <SubmissionCard result={submission} subreddit={comment.subreddit} />
+        ) : null}
       </div>
       <div className="flex w-4/5 ml-auto">
         {comment ? <CommentCard {...comment} /> : null}

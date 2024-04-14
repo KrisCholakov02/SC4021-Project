@@ -9,8 +9,10 @@ import {
   ChevronRightIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
+import { Select } from '@material-tailwind/react';
 import classNames from 'classnames';
 
+import { SentimentPlot } from '@/components/plot';
 // Import the rc-slider component
 import { QueryResultCard } from '@/components/query-result-card';
 import MT from '@/utils/MT';
@@ -33,21 +35,46 @@ export default function Home() {
   const [spellSuggestions, setSpellSuggestions] = useState<string[]>([]);
 
   // Define the sorting options
-  const [sortDirection, setSortDirection] = useState('asc');
-  const [sortField, setSortField] = useState('');
+  const [sortDirection, setSortDirection] = useState('null');
+  const [sortField, setSortField] = useState('null');
+
+  // Define the distribution of the sentiment classes
+  const [sentimentDistribution, setSentimentDistribution] = useState<any[]>([]);
+  // Define the distribution of the subreddits
+  const [subredditDistribution, setSubredditDistribution] = useState<any[]>([]);
 
   // Define the filtering options
   const [isFilteringOpened, setIsFilteringOpened] = useState(false);
-  const [isFilteringApplied, setIsFilteringApplied] = useState(false);
+  const [subredditFilter, setSubredditFilter] = useState<string[]>([]);
+  const [upvotesFromFilter, setUpvotesFromFilter] = useState<any>(undefined);
+  const [upvotesToFilter, setUpvotesToFilter] = useState<any>(undefined);
+  const [publishDateFromFilter, setPublishDateFromFilter] =
+    useState<any>(undefined);
+  const [publishDateToFilter, setPublishDateToFilter] =
+    useState<any>(undefined);
+  const [authorFilter, setAuthorFilter] = useState('');
+  const [sentimentFilter, setSentimentFilter] = useState('');
 
   // Define the page number
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(-1);
 
-  async function sendSimpleSearchRequest(
-    pageNumber: number = 1,
-    sortDirection: string = 'asc',
-    sortField: string = ''
+  async function sendSearchRequest(
+    pageNumber: number,
+    sortDirection: string,
+    sortField: string
   ) {
+    // Define the filters object
+    let dates = [
+      publishDateFromFilter ? publishDateFromFilter : '',
+      publishDateToFilter ? publishDateToFilter : ''
+    ];
+    const filters = {
+      subreddit: subredditFilter,
+      upvotes: [upvotesFromFilter, upvotesToFilter],
+      publishDate: dates,
+      sentiment: sentimentFilter,
+      author: authorFilter
+    };
     try {
       const response = await fetch('/api/search', {
         method: 'POST',
@@ -55,12 +82,11 @@ export default function Home() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          query: simpleSearchQuery ? simpleSearchQuery : '*',
-          field: 'body',
-          numRows: 10,
+          query: simpleSearchQuery !== '' ? simpleSearchQuery : '*',
           page: pageNumber,
           sortField: sortField,
-          sortDirection: sortDirection
+          sortDirection: sortDirection,
+          filters: filters
         })
       });
       if (response.status !== 200) {
@@ -72,6 +98,8 @@ export default function Home() {
       setSearchSpeed(data.responseHeader.QTime);
       setResults(data.response.docs);
       setNumResults(data.response.numFound);
+      setSentimentDistribution(data.facet_counts.facet_fields.Predicted_Class);
+      setSubredditDistribution(data.facet_counts.facet_fields.subreddit);
       if (data.spellcheck?.suggestions.length > 0)
         setSpellSuggestions(data.spellcheck.suggestions[1].suggestion);
       else setSpellSuggestions([]);
@@ -81,32 +109,21 @@ export default function Home() {
   }
 
   useEffect(() => {
+    if (pageNumber === -1 || sortDirection === 'null' || sortField === 'null')
+      return;
+    console.log(pageNumber, sortDirection, sortField);
     async function fetchData() {
-      await sendSimpleSearchRequest(pageNumber, sortDirection, sortField);
+      await sendSearchRequest(pageNumber, sortDirection, sortField);
     }
     fetchData();
   }, [pageNumber, sortDirection, sortField]);
 
-  async function sendSearchWithFiltersRequest() {
-    try {
-      const response = await fetch('/api/search');
-      const data = await response.json();
-      setResults(data);
-      console.log(data);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
-
   async function handleSearchClick() {
     setSearched(true);
     setPageNumber(1);
-    if (!isFilteringApplied) {
-      console.log(simpleSearchQuery);
-      await sendSimpleSearchRequest();
-    } else {
-      await sendSearchWithFiltersRequest();
-    }
+    setSortDirection('asc');
+    setSortField('');
+    await sendSearchRequest(1, 'asc', '');
   }
 
   async function handleSortDirectionChange() {
@@ -131,10 +148,33 @@ export default function Home() {
     setPageNumber(pageNumber + change);
   }
 
+  // Define the function to handle the subreddit checkbox change
+  function handleSubredditCheckboxChange(e: any, subreddit: string) {
+    let filter: string[] = [];
+    if (e.target.checked) {
+      filter = [...subredditFilter, subreddit];
+      e.target.value = 'on';
+    } else {
+      filter = subredditFilter.filter((s) => s !== subreddit);
+      e.target.value = 'off';
+    }
+    console.log(filter);
+    setSubredditFilter(filter);
+  }
+
   return (
     <div className="w-full flex flex-grow">
       {/* Container for the possible left side content to be displayed */}
-      <div className="w-0 lg:w-1/4 2xl:w-1/5"></div>
+      <div className="w-0 lg:w-1/4 2xl:w-1/5">
+        {/*  Plot the distribution of subreddits*/}
+        {subredditDistribution.length > 0 ? (
+          <SentimentPlot
+            data={subredditDistribution}
+            title="Subreddits Distribution"
+            color="one_color"
+          />
+        ) : null}
+      </div>
       {/* Container for central functionality - Search, Results, Sort, etc. */}
       <div className="flex-col flex flex-grow basis-0 items-center justify-center px-8 xl:px-12 2xl:px-18">
         <div className="w-full flex flex-col items-center justify-items-center">
@@ -219,11 +259,14 @@ export default function Home() {
                   >
                     Filter by Subreddit:
                   </MT.Typography>
-                  <div className="">
+                  <div>
                     {subreddits.map((subreddit) => (
                       <label className="flex items-center" key={subreddit}>
                         <MT.Checkbox
                           crossOrigin={undefined}
+                          onChange={(e) =>
+                            handleSubredditCheckboxChange(e, subreddit)
+                          }
                           color="blue-gray"
                           id={subreddit}
                         />
@@ -237,6 +280,27 @@ export default function Home() {
                       </label>
                     ))}
                   </div>
+                </div>
+                {/* Sentiment Analysis Class Filtering */}
+                <MT.Typography
+                  variant="lead"
+                  placeholder={undefined}
+                  className="mb-2"
+                  color="black"
+                >
+                  Sentiment-Based Filtering:
+                </MT.Typography>
+                <div className="w-fit">
+                  <Select
+                    label="Sentiment Class"
+                    value={sentimentFilter}
+                    placeholder={undefined}
+                    onChange={(v) => setSentimentFilter(v as string)}
+                  >
+                    <MT.Option value="positive">Positive</MT.Option>
+                    <MT.Option value="neutral">Neutral</MT.Option>
+                    <MT.Option value="negative">Negative</MT.Option>
+                  </Select>
                 </div>
               </div>
               <div className="w-2/3">
@@ -252,15 +316,23 @@ export default function Home() {
                   <div className="flex items-center space-x-4">
                     <MT.Input
                       crossOrigin={undefined}
+                      value={upvotesFromFilter ? upvotesFromFilter : ''}
                       type="number"
                       label="From"
                       color="black"
+                      onChange={(e) =>
+                        setUpvotesFromFilter(Number(e.target.value))
+                      }
                     />
                     <MT.Input
                       crossOrigin={undefined}
+                      value={upvotesToFilter ? upvotesToFilter : ''}
                       type="number"
                       label="To"
                       color="black"
+                      onChange={(e) =>
+                        setUpvotesToFilter(Number(e.target.value))
+                      }
                     />
                   </div>
                 </div>
@@ -274,12 +346,72 @@ export default function Home() {
                     Publish Date Range:
                   </MT.Typography>
                   <div className="flex items-center space-x-4">
-                    <MT.Input
-                      crossOrigin={undefined}
-                      type="date"
-                      label="From"
-                    />
-                    <MT.Input crossOrigin={undefined} type="date" label="To" />
+                    <div className="flex flex-grow">
+                      <MT.Input
+                        crossOrigin={undefined}
+                        type={
+                          publishDateFromFilter !== undefined ? 'date' : 'text'
+                        }
+                        onClick={() => {
+                          const today = new Date();
+                          const formattedDate = today.toLocaleDateString(
+                            'en-CA',
+                            {
+                              // Canadian locale uses yyyy-mm-dd format
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            }
+                          );
+                          setPublishDateFromFilter(formattedDate);
+                        }}
+                        value={
+                          publishDateFromFilter ? publishDateFromFilter : ''
+                        }
+                        onChange={(e) =>
+                          setPublishDateFromFilter(e.target.value)
+                        }
+                        label="From"
+                      />
+                    </div>
+                    <MT.Button
+                      onClick={() => setPublishDateFromFilter(undefined)}
+                      placeholder={undefined}
+                      className="w-fit"
+                    >
+                      Reset
+                    </MT.Button>
+                    <div className="flex flex-grow">
+                      <MT.Input
+                        crossOrigin={undefined}
+                        type={
+                          publishDateToFilter !== undefined ? 'date' : 'text'
+                        }
+                        onClick={() => {
+                          const today = new Date();
+                          const formattedDate = today.toLocaleDateString(
+                            'en-CA',
+                            {
+                              // Canadian locale uses yyyy-mm-dd format
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            }
+                          );
+                          setPublishDateToFilter(formattedDate);
+                        }}
+                        value={publishDateToFilter ? publishDateToFilter : ''}
+                        label="To"
+                        onChange={(e) => setPublishDateToFilter(e.target.value)}
+                      />
+                    </div>
+                    <MT.Button
+                      onClick={() => setPublishDateToFilter(undefined)}
+                      placeholder={undefined}
+                      className="w-fit"
+                    >
+                      Reset
+                    </MT.Button>
                   </div>
                 </div>
                 {/* Field Search Filtering */}
@@ -294,15 +426,11 @@ export default function Home() {
                   <div>
                     <MT.Input
                       crossOrigin={undefined}
+                      type="text"
+                      value={authorFilter}
+                      onChange={(e) => setAuthorFilter(e.target.value)}
                       color="black"
                       label="Author"
-                    />
-                  </div>
-                  <div>
-                    <MT.Input
-                      crossOrigin={undefined}
-                      color="black"
-                      label="Title"
                     />
                   </div>
                 </div>
@@ -394,7 +522,27 @@ export default function Home() {
         ) : null}
       </div>
       {/* Container for the possible right side content - Charts, Graph, Stats, etc. */}
-      <div className="w-0 lg:w-1/4 2xl:w-1/5"></div>
+      <div className="w-0 lg:w-1/4 2xl:w-1/5">
+        {/* Plot the distribution of the sentiment classes */}
+        {sentimentDistribution.length > 0 ? (
+          <SentimentPlot
+            data={sentimentDistribution}
+            title="Sentiment Analysis Distribution"
+            color="multi"
+          />
+        ) : null}
+        {sentimentDistribution.length > 0 ? (
+          <div className="mt-4 bg-white rounded-lg p-4 transition-all hover:shadow-lg">
+            <MT.Typography
+              variant="lead"
+              color="blue-gray"
+              placeholder={undefined}
+            >
+              Number of results: <strong>{numResults}</strong>
+            </MT.Typography>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
