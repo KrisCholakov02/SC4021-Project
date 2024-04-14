@@ -147,6 +147,7 @@ export default function Home() {
     if (pageNumber + change < 1) return;
     else if (pageNumber + change > numResults / 10) return;
     setPageNumber(pageNumber + change);
+    window.scrollTo(0, 0);
   }
 
   // Define the function to handle the subreddit checkbox change
