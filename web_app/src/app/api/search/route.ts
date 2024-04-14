@@ -81,8 +81,44 @@ export async function POST(req: Request) {
         { status: response.status }
       );
     }
-    // If no results are found, try with q.op=OR
     let responseJSON = await response.json();
+    // If no results are found, try with ~20% fuzziness
+    if (responseJSON.response.numFound === 0) {
+      console.log('No results found, trying with fuzziness');
+      query = `${field}:"${squery}"~20`;
+      // Add the filters to the query
+      if (filters.subreddit.length > 0) {
+        let subredditQuery = filters.subreddit
+          .map((subreddit: string) => `subreddit:${subreddit}`)
+          .join(' OR ');
+        query += ` AND (${subredditQuery})`;
+      }
+      if (filters.author !== '') {
+        query += ` AND (author:"${filters.author}")`;
+      }
+      if (filters.sentiment !== '') {
+        query += ` AND Predicted_Class:"${filters.sentiment}"`;
+      }
+      if (upvotesQuery !== '') query += ` AND (${upvotesQuery})`;
+      if (dateQuery !== '') query += ` AND (${dateQuery})`;
+
+      encodedQuery = encodeURIComponent(query);
+      solrQueryURL = `http://localhost:8983/solr/comments/select?facet.field=Predicted_Class&facet.field=subreddit&facet=true&q=${encodedQuery}&rows=${numRows}&start=${(page - 1) * numRows}${sortQuery}&spellcheck=true&wt=json`;
+      const response = await fetch(solrQueryURL, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.status !== 200) {
+        console.error('An error occurred:', response);
+        return Response.json(
+          { error: 'Internal Server Error' },
+          { status: response.status }
+        );
+      }
+      responseJSON = await response.json();
+    }
     console.log(responseJSON);
     let numFound = responseJSON.response.numFound;
     console.log(numFound);
