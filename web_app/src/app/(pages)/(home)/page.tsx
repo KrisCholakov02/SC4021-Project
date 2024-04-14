@@ -7,7 +7,8 @@ import {
   ArrowUpIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { Select } from '@material-tailwind/react';
 import classNames from 'classnames';
@@ -146,6 +147,7 @@ export default function Home() {
     if (pageNumber + change < 1) return;
     else if (pageNumber + change > numResults / 10) return;
     setPageNumber(pageNumber + change);
+    window.scrollTo(0, 0);
   }
 
   // Define the function to handle the subreddit checkbox change
@@ -337,7 +339,7 @@ export default function Home() {
                   </div>
                 </div>
                 {/* Publish Date Range Filtering */}
-                <div className="mt-4 flex flex-col space-y-2">
+                <div className="mt-4 flex flex-col space-y-2 max-w-full">
                   <MT.Typography
                     variant="lead"
                     placeholder={undefined}
@@ -345,8 +347,8 @@ export default function Home() {
                   >
                     Publish Date Range:
                   </MT.Typography>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex flex-grow">
+                  <div className="flex flex-col 2xl:flex-row 2xl:space-x-2">
+                    <div className="flex flex-grow ">
                       <MT.Input
                         crossOrigin={undefined}
                         type={
@@ -377,9 +379,9 @@ export default function Home() {
                     <MT.Button
                       onClick={() => setPublishDateFromFilter(undefined)}
                       placeholder={undefined}
-                      className="w-fit"
+                      className="w-fit px-4 2xl:px-2"
                     >
-                      Reset
+                      <XMarkIcon className="w-4 h-4 p-0 m-0" />
                     </MT.Button>
                     <div className="flex flex-grow">
                       <MT.Input
@@ -408,9 +410,9 @@ export default function Home() {
                     <MT.Button
                       onClick={() => setPublishDateToFilter(undefined)}
                       placeholder={undefined}
-                      className="w-fit"
+                      className="w-fit px-4 2xl:px-2"
                     >
-                      Reset
+                      <XMarkIcon className="w-4 h-4 p-0 m-0" />
                     </MT.Button>
                   </div>
                 </div>

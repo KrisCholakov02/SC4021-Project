@@ -4,12 +4,11 @@ export async function GET(
 ) {
   // Extract the id from the path
   let id = params.id;
-  let encodedQuery = encodeURIComponent(id);
   let field = 'id';
+  let query = `${field}:${id}`;
+  let encodedQuery = encodeURIComponent(query);
 
-  let finalQuery = `${field}:${encodedQuery}`;
-
-  let solrQueryURL = `http://localhost:8983/solr/comments/select?q=${finalQuery}&rows=${1}&wt=json`;
+  let solrQueryURL = `http://localhost:8983/solr/comments/select?q=${encodedQuery}&rows=${1}&fl=*&wt=json`;
 
   try {
     const response = await fetch(solrQueryURL, {
