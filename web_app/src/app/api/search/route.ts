@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     }
     let responseJSON = await response.json();
     // If no results are found, try with ~20% fuzziness
-    if (responseJSON.response.numFound === 0) {
+    if (responseJSON.response.numFound < 10) {
       console.log('No results found, trying with fuzziness');
       query = `${field}:"${squery}"~20`;
       // Add the filters to the query
